@@ -16,6 +16,11 @@ API_KEY = "0d84e9f68e344ecb814a4d752f19e3ab"
 @bot.event
 async def on_ready():
     print(f'✅ Bot conectado como {bot.user}')
+    try:
+        synced = await bot.tree.sync()
+        print(f"🔁 Comandos sincronizados: {len(synced)}")
+    except Exception as e:
+        print(f"❌ Error al sincronizar comandos: {e}")
 
 @bot.command()
 async def proyecto(ctx, *, mensaje):
