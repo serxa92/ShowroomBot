@@ -37,7 +37,7 @@ async def proyecto(ctx, *, mensaje):
     )
 
     embed = discord.Embed(
-        title=f"🚀 {titulo}",
+        title=f" {titulo}",
         description=f"💡 {descripcion}\n🛠️ {tecnologias}\n🔗 [Ver proyecto]({enlace})",
         color=0x00b7ff
     )
