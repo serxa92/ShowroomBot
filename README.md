@@ -40,8 +40,6 @@ Permite a los usuarios enviar sus proyectos con el comando:
 🛠️ Tecnologías:
 - Python 3.8+
 
-- discord.py
-
 - Microlink API (para capturas)
 
 - Railway / Replit para el hosting
