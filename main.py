@@ -37,7 +37,7 @@ async def proyecto(ctx, *, mensaje):
         f"?access_key={API_KEY}"
         f"&url={enlace}"
         f"&wait_until=page_loaded"
-        f"&delay=4"
+        f"&delay=3"
         f"&format=jpeg"
     )
 
@@ -49,9 +49,10 @@ async def proyecto(ctx, *, mensaje):
     embed.set_footer(text=f"Publicado por {ctx.author}")
     embed.set_image(url=imagen)
 
-    await ctx.send(embed=embed)
+    mensaje = await ctx.send(embed=embed)
     await mensaje.add_reaction("👍")
     await mensaje.add_reaction("🔥")
+
 
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
