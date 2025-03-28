@@ -50,6 +50,8 @@ async def proyecto(ctx, *, mensaje):
     embed.set_image(url=imagen)
 
     await ctx.send(embed=embed)
+    await mensaje.add_reaction("👍")
+    await mensaje.add_reaction("🔥")
 
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
