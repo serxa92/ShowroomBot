@@ -9,27 +9,55 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
-tree = bot.tree
 
 keep_alive()
 
 API_KEY = "0d84e9f68e344ecb814a4d752f19e3ab"
-
 proyectos = {}
 
-class ProyectoModal(discord.ui.Modal, title="📌 Publicar Proyecto"):
-    titulo = discord.ui.TextInput(label="Título del proyecto", placeholder="Mi increíble app", max_length=100)
-    descripcion = discord.ui.TextInput(label="Descripción", style=discord.TextStyle.paragraph, max_length=300)
-    tecnologias = discord.ui.TextInput(label="Tecnologías usadas", placeholder="Python, React, etc.")
-    enlace = discord.ui.TextInput(label="Enlace del proyecto", placeholder="https://github.com/usuario/proyecto")
+class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
+    titulo = discord.ui.TextInput(label="Título", placeholder="Nombre del proyecto", max_length=100)
+    descripcion = discord.ui.TextInput(label="Descripción", placeholder="¿De qué trata tu proyecto?", style=discord.TextStyle.paragraph)
+    tecnologias = discord.ui.TextInput(label="Tecnologías", placeholder="React, Node.js, etc.")
+    enlace = discord.ui.TextInput(label="Enlace al proyecto", placeholder="https://...", required=True)
 
     async def on_submit(self, interaction: discord.Interaction):
+        autor = interaction.user
+        imagen = (
+            f"https://api.apiflash.com/v1/urltoimage"
+            f"?access_key={API_KEY}"
+            f"&url={self.enlace}"
+            f"&wait_until=page_loaded"
+            f"&delay=4"
+            f"&format=jpeg"
+        )
+
         embed = discord.Embed(
             title=f"🚀 {self.titulo}",
             description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
             color=0x00b7ff
         )
-        embed.set_footer(text=f"Publicado por {interaction.user}")
+        embed.set_footer(text=f"Publicado por {autor.display_name}")
+        embed.set_image(url=imagen)
+
+        mensaje = await interaction.channel.send(embed=embed)
+        await mensaje.add_reaction("👍")
+        await mensaje.add_reaction("🔥")
+
+        proyectos[autor.id] = mensaje
+        await interaction.response.send_message("✅ ¡Proyecto publicado!", ephemeral=True)
+
+class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
+    titulo = discord.ui.TextInput(label="Título", max_length=100)
+    descripcion = discord.ui.TextInput(label="Descripción", style=discord.TextStyle.paragraph)
+    tecnologias = discord.ui.TextInput(label="Tecnologías")
+    enlace = discord.ui.TextInput(label="Enlace al proyecto")
+
+    async def on_submit(self, interaction: discord.Interaction):
+        autor = interaction.user
+        if autor.id not in proyectos:
+            await interaction.response.send_message("❌ No tienes ningún proyecto publicado para editar.", ephemeral=True)
+            return
 
         imagen = (
             f"https://api.apiflash.com/v1/urltoimage"
@@ -39,68 +67,38 @@ class ProyectoModal(discord.ui.Modal, title="📌 Publicar Proyecto"):
             f"&delay=4"
             f"&format=jpeg"
         )
+
+        embed = discord.Embed(
+            title=f"🚀 {self.titulo}",
+            description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+            color=0x00b7ff
+        )
+        embed.set_footer(text=f"Publicado por {autor.display_name}")
         embed.set_image(url=imagen)
 
-        mensaje = await interaction.channel.send(embed=embed)
-        await mensaje.add_reaction("👍")
-        await mensaje.add_reaction("🔥")
-        proyectos[interaction.user.id] = mensaje
-        await interaction.response.send_message("✅ Proyecto publicado correctamente.", ephemeral=True)
+        mensaje = proyectos[autor.id]
+        await mensaje.edit(embed=embed)
+        await interaction.response.send_message("✅ Proyecto editado.", ephemeral=True)
 
-@tree.command(name="proyecto", description="Publica un proyecto en el showroom")
-async def slash_proyecto(interaction: discord.Interaction):
+@bot.tree.command(name="proyecto", description="Publica un proyecto en el showroom")
+async def publicar(interaction: discord.Interaction):
     await interaction.response.send_modal(ProyectoModal())
 
-@bot.command(name="editar")
-async def editar_proyecto(ctx, *, mensaje):
-    await ctx.message.delete()
-    if ctx.author.id not in proyectos:
-        await ctx.send("❌ No tienes ningún proyecto publicado para editar.")
+@bot.tree.command(name="editar", description="Edita tu proyecto publicado")
+async def editar(interaction: discord.Interaction):
+    await interaction.response.send_modal(EditarProyectoModal())
+
+@bot.tree.command(name="borrar", description="Elimina tu proyecto del showroom")
+async def borrar(interaction: discord.Interaction):
+    autor = interaction.user
+    if autor.id not in proyectos:
+        await interaction.response.send_message("❌ No tienes ningún proyecto publicado para borrar.", ephemeral=True)
         return
 
-    partes = [x.strip() for x in mensaje.split("|")]
-    if len(partes) < 4:
-        await ctx.send("❌ Usa el formato: `!editar Título|Descripción|Tecnologías|Enlace`")
-        return
-
-    titulo, descripcion, tecnologias, enlace = partes[:4]
-    imagen = (
-        f"https://api.apiflash.com/v1/urltoimage"
-        f"?access_key={API_KEY}"
-        f"&url={enlace}"
-        f"&wait_until=page_loaded"
-        f"&delay=4"
-        f"&format=jpeg"
-    )
-
-    nuevo_embed = discord.Embed(
-        title=f"🚀 {titulo}",
-        description=f"💡 {descripcion}\n🛠️ {tecnologias}\n🔗 [Ver proyecto]({enlace})",
-        color=0x00b7ff
-    )
-    nuevo_embed.set_footer(text=f"Publicado por {ctx.author}")
-    nuevo_embed.set_image(url=imagen)
-
-    try:
-        mensaje_original = proyectos[ctx.author.id]
-        await mensaje_original.edit(embed=nuevo_embed)
-    except Exception as e:
-        await ctx.send("❌ No se pudo editar el mensaje. Puede que haya sido eliminado.")
-
-@bot.command(name="borrar")
-async def borrar_proyecto(ctx):
-    await ctx.message.delete()
-    if ctx.author.id not in proyectos:
-        await ctx.send("❌ No tienes ningún proyecto publicado para borrar.")
-        return
-
-    try:
-        mensaje_original = proyectos[ctx.author.id]
-        await mensaje_original.delete()
-        del proyectos[ctx.author.id]
-        await ctx.send("🗑️ Proyecto borrado correctamente.")
-    except Exception as e:
-        await ctx.send("❌ No se pudo borrar el mensaje. Puede que ya no exista.")
+    mensaje = proyectos[autor.id]
+    await mensaje.delete()
+    del proyectos[autor.id]
+    await interaction.response.send_message("🗑️ Proyecto borrado correctamente.", ephemeral=True)
 
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
@@ -108,10 +106,18 @@ async def mostrar_ayuda(ctx):
     embed = discord.Embed(
         title="📌 Cómo publicar tu proyecto en el showroom",
         description=(
-            "**Comando nuevo:** Usa `/proyecto` para abrir un formulario moderno.\n\n"
+            "**Usa `/proyecto` para abrir un formulario moderno.\n\n"
+            "**Resultado:**\n"
+            "> 🚀 Mi App\n"
+            "> 💡 Gestor de tareas\n"
+            "> 🛠️ React, Node.js\n"
+            "> 🔗 Ver proyecto\n"
+            "> 👤 Publicado por el autor\n\n"
+            "⚠️ Asegúrate de usar `|` como separador entre cada parte.\n"
+            "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
             "**Comandos adicionales:**\n"
-            "🔁 `!editar Título|Descripción|Tecnologías|Enlace` para modificar tu proyecto.\n"
-            "🗑️ `!borrar` para eliminar tu proyecto.\n\n"
+            "↪️ `/editar` para modificar tu proyecto.\n"
+            "🗑️ `/borrar` para eliminar tu proyecto.\n\n"
             "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
         ),
         color=0x3498db
