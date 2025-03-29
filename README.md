@@ -6,10 +6,10 @@ Un bot de Discord para publicar y compartir proyectos dentro de un canal showroo
 
 Permite a los usuarios enviar sus proyectos con el comando:
 
-!proyecto Título|Descripción|Tecnologías|Enlace
+/proyecto
 
 
-📌 El bot elimina el mensaje del usuario y publica un `embed` con:
+📌 El bot abre un formulario interactivo donde pregunta la Descripción, Tecnologías utilizadas y el Enlace al repositorio o al proyecto, borra el mensaje del usuario y publica un `embed` con:
 - 🧠 Descripción del proyecto
 - 🛠️ Tecnologías utilizadas
 - 🔗 Enlace al repositorio o demo
@@ -18,12 +18,14 @@ Permite a los usuarios enviar sus proyectos con el comando:
 ## 🧪 Ejemplo de uso
 
 ```bash
-!proyecto Mi Portfolio|Portfolio componentizado|HTML, CSS, JS|https://sergioagulla.vercel.app/
+/proyecto : Abre un formulario que te guía en el proceso
 ```
 
 📥 Resultado en el canal:
 
-![image](https://github.com/user-attachments/assets/63c56264-4ae8-4d81-aefc-0795cfe20589)
+![image](https://github.com/user-attachments/assets/9b9f1d84-181c-4b7d-b49c-d8747ac8961f)
+
+
 
 ```bash
 !ayuda Muestra una tarjeta con instrucciones detalladas sobre cómo utilizar el bot:
@@ -33,7 +35,8 @@ Permite a los usuarios enviar sus proyectos con el comando:
 
 📥 Resultado en el canal:
 
-![image](https://github.com/user-attachments/assets/4ca3070c-48ac-412d-881c-c845bd0f7aa8)
+![image](https://github.com/user-attachments/assets/98775e0f-5b33-4cc3-950b-547e71e82cb2)
+
 
 
 
