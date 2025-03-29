@@ -121,7 +121,7 @@ async def mostrar_ayuda(ctx):
     embed = discord.Embed(
         title="📌 Cómo publicar tu proyecto en el showroom",
         description=(
-            "**Usa `/proyecto` para abrir un formulario moderno.\n\n"
+            "**Usa `/proyecto` para abrir un formulario que te guíe en el proceso.\n\n"
             "**Resultado:**\n"
             "> =>  Mi App\n"
             "> 💡Gestor de tareas\n"
