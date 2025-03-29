@@ -128,7 +128,7 @@ async def mostrar_ayuda(ctx):
             "> 🛠️ React, Node.js\n"
             "> 🔗 Ver proyecto\n"
             "> 👤 Publicado por el autor\n\n"
-            "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
+            
             "**Comandos adicionales:**\n"
             "↪️ `/editar` para modificar tu último proyecto.\n"
             "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
