@@ -33,7 +33,6 @@ async def obtener_imagen_valida(enlace):
     except:
         pass
 
-    # Imagen por defecto si falla la original
     fallback = (
         f"https://api.apiflash.com/v1/urltoimage"
         f"?access_key={API_KEY}"
@@ -52,22 +51,28 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
 
     async def on_submit(self, interaction: discord.Interaction):
         autor = interaction.user
-        imagen = await obtener_imagen_valida(self.enlace)
+        try:
+            imagen = await obtener_imagen_valida(self.enlace)
 
-        embed = discord.Embed(
-            title=f"🚀 {self.titulo}",
-            description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
-            color=0x00b7ff
-        )
-        embed.set_footer(text=f"Publicado por {autor.display_name}")
-        embed.set_image(url=imagen)
+            embed = discord.Embed(
+                title=f"🚀 {self.titulo}",
+                description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+                color=0x00b7ff
+            )
+            embed.set_footer(text=f"Publicado por {autor.display_name}")
+            embed.set_image(url=imagen)
 
-        mensaje = await interaction.channel.send(embed=embed)
-        await mensaje.add_reaction("👍")
-        await mensaje.add_reaction("🔥")
+            mensaje = await interaction.channel.send(embed=embed)
+            await mensaje.add_reaction("👍")
+            await mensaje.add_reaction("🔥")
 
-        proyectos[autor.id] = mensaje
-        await interaction.response.send_message("✅ ¡Proyecto publicado!", ephemeral=True)
+            proyectos[autor.id] = mensaje
+            await interaction.response.send_message("✅ ¡Proyecto publicado!", ephemeral=True)
+
+        except Exception as e:
+            print(f"❌ Error al enviar proyecto: {e}")
+            if not interaction.response.is_done():
+                await interaction.response.send_message("❌ Hubo un error al publicar tu proyecto.", ephemeral=True)
 
 class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
     titulo = discord.ui.TextInput(label="Título", max_length=100)
@@ -77,23 +82,29 @@ class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
 
     async def on_submit(self, interaction: discord.Interaction):
         autor = interaction.user
-        if autor.id not in proyectos:
-            await interaction.response.send_message("❌ No tienes ningún proyecto publicado para editar.", ephemeral=True)
-            return
+        try:
+            if autor.id not in proyectos:
+                await interaction.response.send_message("❌ No tienes ningún proyecto publicado para editar.", ephemeral=True)
+                return
 
-        imagen = await obtener_imagen_valida(self.enlace)
+            imagen = await obtener_imagen_valida(self.enlace)
 
-        embed = discord.Embed(
-            title=f"🚀 {self.titulo}",
-            description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
-            color=0x00b7ff
-        )
-        embed.set_footer(text=f"Publicado por {autor.display_name}")
-        embed.set_image(url=imagen)
+            embed = discord.Embed(
+                title=f"🚀 {self.titulo}",
+                description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+                color=0x00b7ff
+            )
+            embed.set_footer(text=f"Publicado por {autor.display_name}")
+            embed.set_image(url=imagen)
 
-        mensaje = proyectos[autor.id]
-        await mensaje.edit(embed=embed)
-        await interaction.response.send_message("✅ Proyecto editado.", ephemeral=True)
+            mensaje = proyectos[autor.id]
+            await mensaje.edit(embed=embed)
+            await interaction.response.send_message("✅ Proyecto editado.", ephemeral=True)
+
+        except Exception as e:
+            print(f"❌ Error al editar proyecto: {e}")
+            if not interaction.response.is_done():
+                await interaction.response.send_message("❌ Hubo un error al editar tu proyecto.", ephemeral=True)
 
 @bot.tree.command(name="proyecto", description="Publica un proyecto en el showroom")
 async def publicar(interaction: discord.Interaction):
@@ -128,7 +139,6 @@ async def mostrar_ayuda(ctx):
             "> 🛠️ React, Node.js\n"
             "> 🔗 Ver proyecto\n"
             "> 👤 Publicado por el autor\n\n"
-            
             "**Comandos adicionales:**\n"
             "↪️ `/editar` para modificar tu último proyecto.\n"
             "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
