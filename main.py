@@ -4,6 +4,7 @@ from discord import app_commands
 import os
 from keep_alive import keep_alive
 from dotenv import load_dotenv
+import aiohttp
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -15,6 +16,34 @@ keep_alive()
 API_KEY = "0d84e9f68e344ecb814a4d752f19e3ab"
 proyectos = {}
 
+async def obtener_imagen_valida(enlace):
+    url_imagen = (
+        f"https://api.apiflash.com/v1/urltoimage"
+        f"?access_key={API_KEY}"
+        f"&url={enlace}"
+        f"&wait_until=page_loaded"
+        f"&delay=4"
+        f"&format=jpeg"
+    )
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url_imagen) as resp:
+                if resp.status == 200:
+                    return url_imagen
+    except:
+        pass
+
+    # Imagen por defecto si falla la original
+    fallback = (
+        f"https://api.apiflash.com/v1/urltoimage"
+        f"?access_key={API_KEY}"
+        f"&url=https://github.com"
+        f"&wait_until=page_loaded"
+        f"&delay=4"
+        f"&format=jpeg"
+    )
+    return fallback
+
 class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
     titulo = discord.ui.TextInput(label="Título", placeholder="Nombre del proyecto", max_length=100)
     descripcion = discord.ui.TextInput(label="Descripción", placeholder="¿De qué trata tu proyecto?", style=discord.TextStyle.paragraph)
@@ -23,14 +52,7 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
 
     async def on_submit(self, interaction: discord.Interaction):
         autor = interaction.user
-        imagen = (
-            f"https://api.apiflash.com/v1/urltoimage"
-            f"?access_key={API_KEY}"
-            f"&url={self.enlace}"
-            f"&wait_until=page_loaded"
-            f"&delay=4"
-            f"&format=jpeg"
-        )
+        imagen = await obtener_imagen_valida(self.enlace)
 
         embed = discord.Embed(
             title=f"🚀 {self.titulo}",
@@ -59,14 +81,7 @@ class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
             await interaction.response.send_message("❌ No tienes ningún proyecto publicado para editar.", ephemeral=True)
             return
 
-        imagen = (
-            f"https://api.apiflash.com/v1/urltoimage"
-            f"?access_key={API_KEY}"
-            f"&url={self.enlace}"
-            f"&wait_until=page_loaded"
-            f"&delay=4"
-            f"&format=jpeg"
-        )
+        imagen = await obtener_imagen_valida(self.enlace)
 
         embed = discord.Embed(
             title=f"🚀 {self.titulo}",
@@ -108,16 +123,15 @@ async def mostrar_ayuda(ctx):
         description=(
             "**Usa `/proyecto` para abrir un formulario moderno.\n\n"
             "**Resultado:**\n"
-            "> 🚀 Mi App\n"
-            "> 💡 Gestor de tareas\n"
+            "> =>  Mi App\n"
+            "> 💡Gestor de tareas\n"
             "> 🛠️ React, Node.js\n"
             "> 🔗 Ver proyecto\n"
             "> 👤 Publicado por el autor\n\n"
-            "⚠️ Asegúrate de usar `|` como separador entre cada parte.\n"
             "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
             "**Comandos adicionales:**\n"
-            "↪️ `/editar` para modificar tu proyecto.\n"
-            "🗑️ `/borrar` para eliminar tu proyecto.\n\n"
+            "↪️ `/editar` para modificar tu último proyecto.\n"
+            "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
             "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
         ),
         color=0x3498db
