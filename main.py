@@ -7,10 +7,11 @@ from dotenv import load_dotenv
 import aiohttp
 import json
 from datetime import datetime
+from commands import register_commands 
 
 intents = discord.Intents.default()
 intents.message_content = True
-intents.guilds = True  
+intents.guilds = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -45,141 +46,6 @@ async def obtener_imagen_valida(enlace):
         f"&format=jpeg"
     )
     return fallback
-
-class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
-    titulo = discord.ui.TextInput(label="Título", placeholder="Nombre del proyecto", max_length=100)
-    descripcion = discord.ui.TextInput(label="Descripción", placeholder="¿De qué trata tu proyecto?", style=discord.TextStyle.paragraph)
-    tecnologias = discord.ui.TextInput(label="Tecnologías", placeholder="React, Node.js, etc.")
-    enlace = discord.ui.TextInput(label="Enlace al proyecto", placeholder="https://...", required=True)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        autor = interaction.user
-        try:
-            imagen = await obtener_imagen_valida(self.enlace)
-
-            embed = discord.Embed(
-                title=f"🚀 {self.titulo}",
-                description=f"💡 {self.descripcion}\n🖠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
-                color=0x00b7ff
-            )
-            embed.set_footer(text=f"Publicado por {autor.display_name}")
-            embed.set_image(url=imagen)
-
-            mensaje = await interaction.channel.send(embed=embed)
-            await mensaje.add_reaction("👍")
-            await mensaje.add_reaction("🔥")
-
-            proyectos[autor.id] = mensaje
-            await interaction.response.send_message("✅ ¡Proyecto publicado!", ephemeral=True)
-
-        except Exception as e:
-            print(f"❌ Error al enviar proyecto: {e}")
-            if not interaction.response.is_done():
-                await interaction.response.send_message("❌ Hubo un error al publicar tu proyecto.", ephemeral=True)
-
-class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
-    titulo = discord.ui.TextInput(label="Título", max_length=100)
-    descripcion = discord.ui.TextInput(label="Descripción", style=discord.TextStyle.paragraph)
-    tecnologias = discord.ui.TextInput(label="Tecnologías")
-    enlace = discord.ui.TextInput(label="Enlace al proyecto")
-
-    async def on_submit(self, interaction: discord.Interaction):
-        autor = interaction.user
-        try:
-            if autor.id not in proyectos:
-                await interaction.response.send_message("❌ No tienes ningún proyecto publicado para editar.", ephemeral=True)
-                return
-
-            imagen = await obtener_imagen_valida(self.enlace)
-
-            embed = discord.Embed(
-                title=f"🚀 {self.titulo}",
-                description=f"💡 {self.descripcion}\n🖠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
-                color=0x00b7ff
-            )
-            embed.set_footer(text=f"Publicado por {autor.display_name}")
-            embed.set_image(url=imagen)
-
-            mensaje = proyectos[autor.id]
-            await mensaje.edit(embed=embed)
-            await interaction.response.send_message("✅ Proyecto editado.", ephemeral=True)
-
-        except Exception as e:
-            print(f"❌ Error al editar proyecto: {e}")
-            if not interaction.response.is_done():
-                await interaction.response.send_message("❌ Hubo un error al editar tu proyecto.", ephemeral=True)
-
-@bot.tree.command(name="proyecto", description="Publica un proyecto en el showroom")
-async def publicar(interaction: discord.Interaction):
-    await interaction.response.send_modal(ProyectoModal())
-
-@bot.tree.command(name="editar", description="Edita tu proyecto publicado")
-async def editar(interaction: discord.Interaction):
-    await interaction.response.send_modal(EditarProyectoModal())
-
-@bot.tree.command(name="borrar", description="Elimina tu proyecto del showroom")
-async def borrar(interaction: discord.Interaction):
-    autor = interaction.user
-    if autor.id not in proyectos:
-        await interaction.response.send_message("❌ No tienes ningún proyecto publicado para borrar.", ephemeral=True)
-        return
-
-    mensaje = proyectos[autor.id]
-    await mensaje.delete()
-    del proyectos[autor.id]
-    await interaction.response.send_message("🗑️ Proyecto borrado correctamente.", ephemeral=True)
-
-@bot.tree.command(name="servers", description="Muestra los servidores donde está el bot")
-async def listar_servidores(interaction: discord.Interaction):
-    try:
-        if not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
-            return
-
-        lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
-        mensaje = "\n".join(lista_servidores)
-
-        if len(mensaje) > 1900:
-            mensaje = mensaje[:1900] + "\n... (truncado)"
-
-        await interaction.response.send_message(
-            f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
-            ephemeral=True
-        )
-
-    except Exception as e:
-        print(f"❌ Error en /servers: {e}")
-        if not interaction.response.is_done():
-            await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
-
-@bot.tree.command(name="panel", description="Muestra los servidores registrados por el bot")
-async def mostrar_panel(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
-        return
-
-    try:
-        with open("servers.json", "r") as f:
-            servidores = json.load(f)
-    except FileNotFoundError:
-        servidores = []
-
-    if not servidores:
-        await interaction.response.send_message("ℹ️ Aún no hay servidores registrados.", ephemeral=True)
-        return
-
-    mensaje = "\n".join([
-        f"• {s['nombre']} (ID: {s['id']}) - Owner ID: {s['owner_id']} - {s['fecha'][:10]}"
-        for s in servidores
-    ])
-
-    if len(mensaje) > 1900:
-        mensaje = mensaje[:1900] + "\n... (truncado)"
-
-    await interaction.response.send_message(
-        f"📋 Servidores registrados:\n```{mensaje}```",
-        ephemeral=True
-    )
 
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
@@ -265,13 +131,15 @@ async def on_ready():
             json.dump(servidores, f, indent=4)
         print(f"🗂️ Se añadieron {nuevos} servidores al log.")
 
-    # 🔁 FORZAMOS la sincronización por servidor
     for guild in bot.guilds:
         try:
             synced = await bot.tree.sync(guild=guild)
             print(f"🔁 Slash commands sincronizados para: {guild.name} ({guild.id}) - {len(synced)} comandos")
         except Exception as e:
             print(f"❌ Error al sincronizar en {guild.name}: {e}")
+
+register_commands(bot)  
+
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 if token is None:
