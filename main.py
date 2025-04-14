@@ -133,11 +133,10 @@ async def on_ready():
 
     for guild in bot.guilds:
         try:
-            synced = await bot.tree.sync(guild=guild)
-            print(f"🔁 Slash commands sincronizados para: {guild.name} ({guild.id}) - {len(synced)} comandos")
+            synced = await bot.tree.sync()
+            print(f"🔁 Comandos globales sincronizados: {len(synced)}")
         except Exception as e:
-            print(f"❌ Error al sincronizar en {guild.name}: {e}")
-
+            print(f"❌ Error al sincronizar comandos globales: {e}")
 register_commands(bot)  
 
 load_dotenv()
