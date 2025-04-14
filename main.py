@@ -126,46 +126,29 @@ async def borrar(interaction: discord.Interaction):
     await mensaje.delete()
     del proyectos[autor.id]
     await interaction.response.send_message("🗑️ Proyecto borrado correctamente.", ephemeral=True)
-   
-    @bot.tree.command(name="servers", description="Muestra los servidores donde está el bot")
-    async def listar_servidores(interaction: discord.Interaction):
-        try:
-            if not interaction.user.guild_permissions.administrator:
-                await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
-                return
-    
-            lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
-            mensaje = "\n".join(lista_servidores)
-    
-            if len(mensaje) > 1900:
-                mensaje = mensaje[:1900] + "\n... (truncado)"
-    
-            await interaction.response.send_message(
-                f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
-                ephemeral=True
-            )
-    
-        except Exception as e:
-            print(f"❌ Error en /servers: {e}")
-            if not interaction.response.is_done():
-                await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
-                # ✅ LOGS cuando entra o sale de servidores
-@bot.event
-async def on_guild_join(guild):
-    print(f"🟢 El bot ha sido añadido al servidor: {guild.name} (ID: {guild.id})")
 
-@bot.event
-async def on_guild_remove(guild):
-    print(f"🔴 El bot ha sido eliminado del servidor: {guild.name} (ID: {guild.id})")
-
-@bot.event
-async def on_ready():
-    print(f'✅ Bot conectado como {bot.user}')
+@bot.tree.command(name="servers", description="Muestra los servidores donde está el bot")
+async def listar_servidores(interaction: discord.Interaction):
     try:
-        synced = await bot.tree.sync()
-        print(f"🔁 Comandos sincronizados: {len(synced)}")
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
+            return
+
+        lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
+        mensaje = "\n".join(lista_servidores)
+
+        if len(mensaje) > 1900:
+            mensaje = mensaje[:1900] + "\n... (truncado)"
+
+        await interaction.response.send_message(
+            f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
+            ephemeral=True
+        )
+
     except Exception as e:
-        print(f"❌ Error al sincronizar comandos: {e}")
+        print(f"❌ Error en /servers: {e}")
+        if not interaction.response.is_done():
+            await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
 
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
@@ -189,7 +172,24 @@ async def mostrar_ayuda(ctx):
     )
     await ctx.send(embed=embed)
 
+@bot.event
+async def on_guild_join(guild):
+    print(f"🟢 El bot ha sido añadido al servidor: {guild.name} (ID: {guild.id})")
 
+@bot.event
+async def on_guild_remove(guild):
+    print(f"🔴 El bot ha sido eliminado del servidor: {guild.name} (ID: {guild.id})")
+
+@bot.event
+async def on_ready():
+    print(f'✅ Bot conectado como {bot.user}')
+    try:
+        synced = await bot.tree.sync()
+        print("🔁 Comandos sincronizados:")
+        for command in synced:
+            print(f"- /{command.name}: {command.description}")
+    except Exception as e:
+        print(f"❌ Error al sincronizar comandos: {e}")
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
