@@ -5,13 +5,10 @@ import os
 from keep_alive import keep_alive
 from dotenv import load_dotenv
 import aiohttp
-import json
-from datetime import datetime
-
 
 intents = discord.Intents.default()
 intents.message_content = True
-intents.guilds = True  
+intents.guilds = True 
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -153,35 +150,6 @@ async def listar_servidores(interaction: discord.Interaction):
         if not interaction.response.is_done():
             await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
 
-@bot.tree.command(name="panel", description="Muestra los servidores registrados por el bot")
-async def mostrar_panel(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
-        return
-
-    try:
-        with open("servers.json", "r") as f:
-            servidores = json.load(f)
-    except FileNotFoundError:
-        servidores = []
-
-    if not servidores:
-        await interaction.response.send_message("ℹ️ Aún no hay servidores registrados.", ephemeral=True)
-        return
-
-    mensaje = "\n".join([
-        f"• {s['nombre']} (ID: {s['id']}) - Owner ID: {s['owner_id']} - {s['fecha'][:10]}"
-        for s in servidores
-    ])
-
-    if len(mensaje) > 1900:
-        mensaje = mensaje[:1900] + "\n... (truncado)"
-
-    await interaction.response.send_message(
-        f"📋 Servidores registrados:\n```{mensaje}```",
-        ephemeral=True
-    )
-
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
     await ctx.message.delete()
@@ -204,75 +172,6 @@ async def mostrar_ayuda(ctx):
     )
     await ctx.send(embed=embed)
 
-@bot.event
-async def on_guild_join(guild):
-    data = {
-        "nombre": guild.name,
-        "id": guild.id,
-        "owner_id": guild.owner_id,
-        "fecha": datetime.utcnow().isoformat()
-    }
-
-    try:
-        with open("servers.json", "r") as f:
-            servidores = json.load(f)
-    except FileNotFoundError:
-        servidores = []
-
-    if not any(s["id"] == guild.id for s in servidores):
-        servidores.append(data)
-        with open("servers.json", "w") as f:
-            json.dump(servidores, f, indent=4)
-        print(f"🟢 Registrado: {guild.name} (ID: {guild.id})")
-
-@bot.event
-async def on_guild_remove(guild):
-    print(f"🔴 El bot ha sido eliminado del servidor: {guild.name} (ID: {guild.id})")
-    try:
-        with open("servers.json", "r") as f:
-            servidores = json.load(f)
-    except FileNotFoundError:
-        servidores = []
-
-    servidores = [s for s in servidores if s["id"] != guild.id]
-
-    with open("servers.json", "w") as f:
-        json.dump(servidores, f, indent=4)
-    print(f"🗑️ Eliminado del registro: {guild.name} (ID: {guild.id})")
-
-@bot.event
-async def on_ready():
-    print(f'✅ Bot conectado como {bot.user}')
-
-    try:
-        with open("servers.json", "r") as f:
-            servidores = json.load(f)
-    except FileNotFoundError:
-        servidores = []
-
-    nuevos = 0
-    for guild in bot.guilds:
-        if not any(s["id"] == guild.id for s in servidores):
-            servidores.append({
-                "nombre": guild.name,
-                "id": guild.id,
-                "owner_id": guild.owner_id,
-                "fecha": datetime.utcnow().isoformat()
-            })
-            nuevos += 1
-
-    if nuevos > 0:
-        with open("servers.json", "w") as f:
-            json.dump(servidores, f, indent=4)
-        print(f"🗂️ Se añadieron {nuevos} servidores al log.")
-
-    # 🔁 FORZAMOS la sincronización por servidor
-    for guild in bot.guilds:
-        try:
-            synced = await bot.tree.sync(guild=guild)
-            print(f"🔁 Slash commands sincronizados para: {guild.name} ({guild.id}) - {len(synced)} comandos")
-        except Exception as e:
-            print(f"❌ Error al sincronizar en {guild.name}: {e}")
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 if token is None:
