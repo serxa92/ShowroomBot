@@ -168,7 +168,7 @@ async def listar_servidores(interaction: discord.Interaction):
     )
 
 # ✅ LOGS cuando entra o sale de servidores
-d@bot.event
+@bot.event
 async def on_guild_join(guild):
     print(f"🟢 El bot ha sido añadido al servidor: {guild.name} (ID: {guild.id})")
 
