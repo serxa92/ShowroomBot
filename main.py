@@ -10,7 +10,7 @@ from datetime import datetime
 
 intents = discord.Intents.default()
 intents.message_content = True
-intents.guilds = True  # Necesario para acceder a los servidores
+intents.guilds = True  
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -152,6 +152,29 @@ async def listar_servidores(interaction: discord.Interaction):
         if not interaction.response.is_done():
             await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
 
+
+
+@bot.command(name="ayuda")
+async def mostrar_ayuda(ctx):
+    await ctx.message.delete()
+    embed = discord.Embed(
+        title="📌 Cómo publicar tu proyecto en el showroom",
+        description=(
+            "**Usa `/proyecto` para abrir un formulario que te guíe en el proceso.\n\n"
+            "**Resultado:**\n"
+            "> =>  Mi App\n"
+            "> 💡Gestor de tareas\n"
+            "> 🖠️ React, Node.js\n"
+            "> 🔗 Ver proyecto\n"
+            "> 👤 Publicado por el autor\n\n"
+            "**Comandos adicionales:**\n"
+            "↪️ `/editar` para modificar tu último proyecto.\n"
+            "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
+            "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
+        ),
+        color=0x3498db
+    )
+    await ctx.send(embed=embed)
 @bot.tree.command(name="panel", description="Muestra los servidores registrados por el bot")
 async def mostrar_panel(interaction: discord.Interaction):
     if not interaction.user.guild_permissions.administrator:
@@ -180,29 +203,6 @@ async def mostrar_panel(interaction: discord.Interaction):
         f"📋 Servidores registrados:\n```{mensaje}```",
         ephemeral=True
     )
-
-@bot.command(name="ayuda")
-async def mostrar_ayuda(ctx):
-    await ctx.message.delete()
-    embed = discord.Embed(
-        title="📌 Cómo publicar tu proyecto en el showroom",
-        description=(
-            "**Usa `/proyecto` para abrir un formulario que te guíe en el proceso.\n\n"
-            "**Resultado:**\n"
-            "> =>  Mi App\n"
-            "> 💡Gestor de tareas\n"
-            "> 🖠️ React, Node.js\n"
-            "> 🔗 Ver proyecto\n"
-            "> 👤 Publicado por el autor\n\n"
-            "**Comandos adicionales:**\n"
-            "↪️ `/editar` para modificar tu último proyecto.\n"
-            "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
-            "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
-        ),
-        color=0x3498db
-    )
-    await ctx.send(embed=embed)
-
 @bot.event
 async def on_guild_join(guild):
     data = {
