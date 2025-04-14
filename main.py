@@ -8,7 +8,6 @@ import aiohttp
 
 intents = discord.Intents.default()
 intents.message_content = True
-intents.guilds = True 
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -57,7 +56,7 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
 
             embed = discord.Embed(
                 title=f"🚀 {self.titulo}",
-                description=f"💡 {self.descripcion}\n🖠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+                description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
                 color=0x00b7ff
             )
             embed.set_footer(text=f"Publicado por {autor.display_name}")
@@ -92,7 +91,7 @@ class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
 
             embed = discord.Embed(
                 title=f"🚀 {self.titulo}",
-                description=f"💡 {self.descripcion}\n🖠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+                description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
                 color=0x00b7ff
             )
             embed.set_footer(text=f"Publicado por {autor.display_name}")
@@ -127,50 +126,36 @@ async def borrar(interaction: discord.Interaction):
     del proyectos[autor.id]
     await interaction.response.send_message("🗑️ Proyecto borrado correctamente.", ephemeral=True)
 
-@bot.tree.command(name="servers", description="Muestra los servidores donde está el bot")
-async def listar_servidores(interaction: discord.Interaction):
-    try:
-        if not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
-            return
-
-        lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
-        mensaje = "\n".join(lista_servidores)
-
-        if len(mensaje) > 1900:
-            mensaje = mensaje[:1900] + "\n... (truncado)"
-
-        await interaction.response.send_message(
-            f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
-            ephemeral=True
-        )
-
-    except Exception as e:
-        print(f"❌ Error en /servers: {e}")
-        if not interaction.response.is_done():
-            await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
-
 @bot.command(name="ayuda")
 async def mostrar_ayuda(ctx):
     await ctx.message.delete()
     embed = discord.Embed(
         title="📌 Cómo publicar tu proyecto en el showroom",
         description=(
-            "**Usa `/proyecto` para abrir un formulario que te guíe en el proceso.\n\n"
+            "**Usa /proyecto para abrir un formulario que te guíe en el proceso.\n\n"
             "**Resultado:**\n"
             "> =>  Mi App\n"
             "> 💡Gestor de tareas\n"
-            "> 🖠️ React, Node.js\n"
+            "> 🛠️ React, Node.js\n"
             "> 🔗 Ver proyecto\n"
             "> 👤 Publicado por el autor\n\n"
             "**Comandos adicionales:**\n"
-            "↪️ `/editar` para modificar tu último proyecto.\n"
-            "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
+            "↪️ /editar para modificar tu último proyecto.\n"
+            "🗑️ /borrar para eliminar tu último proyecto.\n\n"
             "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
         ),
         color=0x3498db
     )
     await ctx.send(embed=embed)
+
+@bot.event
+async def on_ready():
+    print(f'✅ Bot conectado como {bot.user}')
+    try:
+        synced = await bot.tree.sync()
+        print(f"🔁 Comandos sincronizados: {len(synced)}")
+    except Exception as e:
+        print(f"❌ Error al sincronizar comandos: {e}")
 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
