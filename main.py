@@ -8,6 +8,7 @@ import aiohttp
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.guilds = True  # Necesario para acceder a los servidores
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -56,7 +57,7 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
 
             embed = discord.Embed(
                 title=f"🚀 {self.titulo}",
-                description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+                description=f"💡 {self.descripcion}\n🖠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
                 color=0x00b7ff
             )
             embed.set_footer(text=f"Publicado por {autor.display_name}")
@@ -91,7 +92,7 @@ class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
 
             embed = discord.Embed(
                 title=f"🚀 {self.titulo}",
-                description=f"💡 {self.descripcion}\n🛠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
+                description=f"💡 {self.descripcion}\n🖠️ {self.tecnologias}\n🔗 [Ver proyecto]({self.enlace})",
                 color=0x00b7ff
             )
             embed.set_footer(text=f"Publicado por {autor.display_name}")
@@ -136,7 +137,7 @@ async def mostrar_ayuda(ctx):
             "**Resultado:**\n"
             "> =>  Mi App\n"
             "> 💡Gestor de tareas\n"
-            "> 🛠️ React, Node.js\n"
+            "> 🖠️ React, Node.js\n"
             "> 🔗 Ver proyecto\n"
             "> 👤 Publicado por el autor\n\n"
             "**Comandos adicionales:**\n"
@@ -147,6 +148,33 @@ async def mostrar_ayuda(ctx):
         color=0x3498db
     )
     await ctx.send(embed=embed)
+
+# ✅ COMANDO NUEVO: /servers
+@bot.tree.command(name="servers", description="Muestra los servidores donde está el bot")
+async def listar_servidores(interaction: discord.Interaction):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
+        return
+
+    lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
+    mensaje = "\n".join(lista_servidores)
+
+    if len(mensaje) > 1900:
+        mensaje = mensaje[:1900] + "\n... (truncado)"
+
+    await interaction.response.send_message(
+        f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
+        ephemeral=True
+    )
+
+# ✅ LOGS cuando entra o sale de servidores
+d@bot.event
+async def on_guild_join(guild):
+    print(f"🟢 El bot ha sido añadido al servidor: {guild.name} (ID: {guild.id})")
+
+@bot.event
+async def on_guild_remove(guild):
+    print(f"🔴 El bot ha sido eliminado del servidor: {guild.name} (ID: {guild.id})")
 
 @bot.event
 async def on_ready():
