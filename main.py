@@ -152,20 +152,26 @@ async def mostrar_ayuda(ctx):
 # ✅ COMANDO NUEVO: /servers
 @bot.tree.command(name="servers", description="Muestra los servidores donde está el bot")
 async def listar_servidores(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
-        return
+    try:
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Solo los administradores pueden usar este comando.", ephemeral=True)
+            return
 
-    lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
-    mensaje = "\n".join(lista_servidores)
+        lista_servidores = [f"- {guild.name} (ID: {guild.id})" for guild in bot.guilds]
+        mensaje = "\n".join(lista_servidores)
 
-    if len(mensaje) > 1900:
-        mensaje = mensaje[:1900] + "\n... (truncado)"
+        if len(mensaje) > 1900:
+            mensaje = mensaje[:1900] + "\n... (truncado)"
 
-    await interaction.response.send_message(
-        f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
-        ephemeral=True
-    )
+        await interaction.response.send_message(
+            f"📋 El bot está en **{len(bot.guilds)}** servidores:\n```{mensaje}```",
+            ephemeral=True
+        )
+
+    except Exception as e:
+        print(f"❌ Error en /servers: {e}")
+        if not interaction.response.is_done():
+            await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
 
 # ✅ LOGS cuando entra o sale de servidores
 @bot.event
