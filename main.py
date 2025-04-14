@@ -152,29 +152,6 @@ async def listar_servidores(interaction: discord.Interaction):
         if not interaction.response.is_done():
             await interaction.response.send_message("❌ Hubo un error ejecutando el comando.", ephemeral=True)
 
-
-
-@bot.command(name="ayuda")
-async def mostrar_ayuda(ctx):
-    await ctx.message.delete()
-    embed = discord.Embed(
-        title="📌 Cómo publicar tu proyecto en el showroom",
-        description=(
-            "**Usa `/proyecto` para abrir un formulario que te guíe en el proceso.\n\n"
-            "**Resultado:**\n"
-            "> =>  Mi App\n"
-            "> 💡Gestor de tareas\n"
-            "> 🖠️ React, Node.js\n"
-            "> 🔗 Ver proyecto\n"
-            "> 👤 Publicado por el autor\n\n"
-            "**Comandos adicionales:**\n"
-            "↪️ `/editar` para modificar tu último proyecto.\n"
-            "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
-            "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
-        ),
-        color=0x3498db
-    )
-    await ctx.send(embed=embed)
 @bot.tree.command(name="panel", description="Muestra los servidores registrados por el bot")
 async def mostrar_panel(interaction: discord.Interaction):
     if not interaction.user.guild_permissions.administrator:
@@ -203,6 +180,29 @@ async def mostrar_panel(interaction: discord.Interaction):
         f"📋 Servidores registrados:\n```{mensaje}```",
         ephemeral=True
     )
+
+@bot.command(name="ayuda")
+async def mostrar_ayuda(ctx):
+    await ctx.message.delete()
+    embed = discord.Embed(
+        title="📌 Cómo publicar tu proyecto en el showroom",
+        description=(
+            "**Usa `/proyecto` para abrir un formulario que te guíe en el proceso.\n\n"
+            "**Resultado:**\n"
+            "> =>  Mi App\n"
+            "> 💡Gestor de tareas\n"
+            "> 🖠️ React, Node.js\n"
+            "> 🔗 Ver proyecto\n"
+            "> 👤 Publicado por el autor\n\n"
+            "**Comandos adicionales:**\n"
+            "↪️ `/editar` para modificar tu último proyecto.\n"
+            "🗑️ `/borrar` para eliminar tu último proyecto.\n\n"
+            "🖼️ La imagen se genera automáticamente desde la URL del proyecto."
+        ),
+        color=0x3498db
+    )
+    await ctx.send(embed=embed)
+
 @bot.event
 async def on_guild_join(guild):
     data = {
@@ -265,14 +265,13 @@ async def on_ready():
             json.dump(servidores, f, indent=4)
         print(f"🗂️ Se añadieron {nuevos} servidores al log.")
 
-    try:
-        synced = await bot.tree.sync()
-        print("🔁 Comandos sincronizados:")
-        for command in synced:
-            print(f"- /{command.name}: {command.description}")
-    except Exception as e:
-        print(f"❌ Error al sincronizar comandos: {e}")
-
+    # 🔁 FORZAMOS la sincronización por servidor
+    for guild in bot.guilds:
+        try:
+            synced = await bot.tree.sync(guild=guild)
+            print(f"🔁 Slash commands sincronizados para: {guild.name} ({guild.id}) - {len(synced)} comandos")
+        except Exception as e:
+            print(f"❌ Error al sincronizar en {guild.name}: {e}")
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 if token is None:
