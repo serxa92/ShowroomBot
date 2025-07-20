@@ -5,6 +5,12 @@ import os
 from keep_alive import keep_alive
 from dotenv import load_dotenv
 import aiohttp
+from supabase import create_client, Client
+
+load_dotenv()
+API_URL = os.getenv("API_URL")
+API_KEY = os.getenv("API_KEY")
+supabase: Client = create_client(API_URL, API_KEY)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -13,7 +19,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 keep_alive()
 
-API_KEY = "0d84e9f68e344ecb814a4d752f19e3ab"
+API_KEY = os.getenv("API_KEY")
+
 proyectos = {}
 
 async def obtener_imagen_valida(enlace):
@@ -67,12 +74,31 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
             await mensaje.add_reaction("🔥")
 
             proyectos[autor.id] = mensaje
+
+            # Guardar en Supabase
+            datos = {
+                "user_id": str(autor.id),
+                "autor": autor.display_name,
+                "titulo": self.titulo.value,
+                "descripcion": self.descripcion.value,
+                "tecnologias": self.tecnologias.value,
+                "enlace": self.enlace.value,
+                "imagen_url": imagen,
+            }
+
+            try:
+                supabase.table("proyectos").upsert(datos, on_conflict=["user_id"]).execute()
+
+            except Exception as e:
+                print(f"❌ Error al guardar en Supabase: {e}")
+
             await interaction.response.send_message("✅ ¡Proyecto publicado!", ephemeral=True)
 
         except Exception as e:
             print(f"❌ Error al enviar proyecto: {e}")
             if not interaction.response.is_done():
                 await interaction.response.send_message("❌ Hubo un error al publicar tu proyecto.", ephemeral=True)
+
 
 class EditarProyectoModal(discord.ui.Modal, title="✏️ Edita tu proyecto"):
     titulo = discord.ui.TextInput(label="Título", max_length=100)
