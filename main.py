@@ -90,7 +90,8 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
             }
 
             try:
-                supabase.table("projects").upsert(datos, on_conflict=["user_id"]).execute()
+                supabase.table("proyectos").insert(datos).execute()
+
 
 
             except Exception as e:
