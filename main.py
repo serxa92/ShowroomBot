@@ -20,8 +20,6 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 keep_alive()
 
-API_KEY = os.getenv("API_KEY")
-
 proyectos = {}
 
 async def obtener_imagen_valida(enlace):
