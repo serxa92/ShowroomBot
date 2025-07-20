@@ -90,7 +90,7 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
             }
 
             try:
-                supabase.table("proyectos").insert(datos).execute()
+                supabase.table("projects").insert(datos).execute()
 
 
 
