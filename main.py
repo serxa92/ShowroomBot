@@ -8,8 +8,12 @@ import aiohttp
 from supabase import create_client, Client
 
 load_dotenv()
+
 API_URL = os.getenv("SUPABASE_URL")
 API_KEY = os.getenv("SUPABASE_KEY")
+print("SUPABASE_URL:", API_URL)
+print("SUPABASE_KEY:", API_KEY)
+
 supabase: Client = create_client(API_URL, API_KEY)
 APIFLASH_KEY = os.getenv("APIFLASH_KEY")
 
@@ -86,7 +90,8 @@ class ProyectoModal(discord.ui.Modal, title="📝 Publica tu proyecto"):
             }
 
             try:
-                supabase.table("proyectos").upsert(datos, on_conflict=["user_id"]).execute()
+                supabase.table("projects").upsert(datos, on_conflict=["user_id"]).execute()
+
 
             except Exception as e:
                 print(f"❌ Error al guardar en Supabase: {e}")
@@ -182,7 +187,10 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Error al sincronizar comandos: {e}")
 
-load_dotenv()
+APIFLASH_KEY = os.getenv("APIFLASH_KEY")
+if APIFLASH_KEY is None:
+    raise ValueError("❌ No se encontró APIFLASH_KEY en el archivo .env")
+
 token = os.getenv("DISCORD_TOKEN")
 if token is None:
     raise ValueError("❌ No se encontró DISCORD_TOKEN en el archivo .env")
