@@ -8,8 +8,8 @@ import aiohttp
 from supabase import create_client, Client
 
 load_dotenv()
-API_URL = os.getenv("API_URL")
-API_KEY = os.getenv("API_KEY")
+API_URL = os.getenv("SUPABASE_URL")
+API_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(API_URL, API_KEY)
 
 intents = discord.Intents.default()
