@@ -11,6 +11,7 @@ load_dotenv()
 API_URL = os.getenv("SUPABASE_URL")
 API_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(API_URL, API_KEY)
+APIFLASH_KEY = os.getenv("APIFLASH_KEY")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -26,7 +27,7 @@ proyectos = {}
 async def obtener_imagen_valida(enlace):
     url_imagen = (
         f"https://api.apiflash.com/v1/urltoimage"
-        f"?access_key={API_KEY}"
+        f"?access_key={APIFLASH_KEY}"
         f"&url={enlace}"
         f"&wait_until=page_loaded"
         f"&delay=4"
@@ -42,7 +43,7 @@ async def obtener_imagen_valida(enlace):
 
     fallback = (
         f"https://api.apiflash.com/v1/urltoimage"
-        f"?access_key={API_KEY}"
+        f"?access_key={APIFLASH_KEY}"
         f"&url=https://github.com"
         f"&wait_until=page_loaded"
         f"&delay=4"
