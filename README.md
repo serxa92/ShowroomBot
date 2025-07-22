@@ -49,7 +49,9 @@ Permite a los usuarios enviar sus proyectos con el comando:
 
 📄 Licencia
 
-- Este proyecto está licenciado bajo la MIT License. Consulta el archivo [`LICENSE`](LICENSE) para más detalles.
+- This project is **not open-source**. All rights reserved © 2025 Sergio Agulla Pouseu.
+
+Use of this code without explicit permission is strictly prohibited.
 
 
 
