@@ -4,7 +4,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "El bot está vivo 🚀"
+    return "El bot está vivo y funcionando."
 
 @app.route('/terms')
 def terms():
