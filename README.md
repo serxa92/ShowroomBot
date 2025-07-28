@@ -1,8 +1,9 @@
 # 🤖 ShowroomBot
 
 Un bot de Discord para publicar y compartir proyectos dentro de un canal showroom. Ideal para comunidades de programadores o estudiantes que quieren mostrar lo que están construyendo .
+Descubre mas en: [web](https://showroom-bot-website.vercel.app/)
 
-## ✨ ¿Qué hace?
+## ¿Qué hace?
 
 Permite a los usuarios enviar sus proyectos con el comando:
 
@@ -15,7 +16,7 @@ Permite a los usuarios enviar sus proyectos con el comando:
 - 🔗 Enlace al repositorio o demo
 - 🖼️ Miniatura generada automáticamente desde el enlace (captura de pantalla)
 
-## 🧪 Ejemplo de uso
+## Ejemplo de uso
 
 ```bash
 /proyecto : Abre un formulario que te guía en el proceso

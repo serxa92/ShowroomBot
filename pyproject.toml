@@ -1,8 +1,8 @@
 [project]
-name = "python-template"
+name = "Showroom Bot"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Un bot de Discord para publicar y compartir proyectos dentro de un canal showroom. Ideal para comunidades de programadores o estudiantes que quieren mostrar lo que están construyendo ."
+authors = ["Sergio Agulla"]
 requires-python = ">=3.11"
 dependencies = [
     "discord-py-interactions==5.13.2",
